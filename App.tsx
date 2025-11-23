@@ -11,30 +11,7 @@ import { runSimulation } from './simulation';
 import MonthlyTrackingView from './components/MonthlyTrackingView';
 import DataManagement from './components/DataManagement';
 import MilestoneTimeline from './components/MilestoneTimeline';
-
-const InputField: React.FC<{
-  label: string;
-  value: number;
-  onChange: (val: number) => void;
-  suffix?: string;
-  step?: string;
-}> = ({ label, value, onChange, suffix, step = "1" }) => (
-  <div className="flex flex-col">
-    <label className="text-xs text-brand-light mb-1.5 font-medium uppercase">{label}</label>
-    <div className="relative">
-      <input 
-        type="number"
-        step={step}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-        className="w-full bg-brand-primary border border-brand-accent rounded-lg p-2.5 text-brand-text focus:ring-2 focus:ring-brand-teal focus:border-transparent transition font-mono"
-      />
-      {suffix && (
-        <span className="absolute right-3 top-2.5 text-brand-light text-sm">{suffix}</span>
-      )}
-    </div>
-  </div>
-);
+import InputField from './components/InputField';
 
 const Checkbox: React.FC<{
   label: string;
