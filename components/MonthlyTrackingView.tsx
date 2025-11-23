@@ -7,6 +7,7 @@ import type { MonthlyRecord, Category } from '../types';
 import { ArrowUpIcon, ArrowDownIcon, PiggyBankIcon, ChartBarIcon } from './Icons';
 import DashboardCard from './DashboardCard';
 import CollapsiblePanel from './components/CollapsiblePanel';
+import InputField from './InputField';
 
 interface MonthlyTrackingViewProps {
   data: MonthlyRecord[];
@@ -22,21 +23,6 @@ const MONTHS = [
 ];
 
 const formatCurrency = (val: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
-
-const InputField: React.FC<{ label: string; value: number; onChange: (val: number) => void; suffix?: string; color?: string }> = ({ label, value, onChange, suffix, color }) => (
-    <div className="flex flex-col">
-      <label className={`text-xs mb-1.5 font-medium uppercase truncate ${color ? '' : 'text-brand-light'}`} style={{ color: color }}>{label}</label>
-      <div className="relative">
-        <input 
-          type="number"
-          value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className="w-full bg-brand-primary border border-brand-accent rounded-lg p-2 text-brand-text focus:ring-2 focus:ring-brand-teal focus:border-transparent transition font-mono text-sm"
-        />
-        {suffix && <span className="absolute right-3 top-2 text-brand-light text-xs">{suffix}</span>}
-      </div>
-    </div>
-  );
 
 const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categories, onAddRecord, onDeleteRecord, onUpdateCategories }) => {
   const currentYear = new Date().getFullYear();
@@ -118,14 +104,13 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
     notes: ''
   });
 
-  // Use Effect to update form based on incoming data (Prop change)
-  useEffect(() => {
+  // Unified Initialization Logic
+  const getInitialFormState = (records: MonthlyRecord[]) => {
       // 1. Details template based on categories
       const initialDetails: Record<string, number> = {};
       categories.forEach(c => initialDetails[c.id] = 0);
 
-      // 2. Find latest record
-      const sorted = [...data].sort((a,b) => (b.year * 12 + b.month) - (a.year * 12 + a.month));
+      const sorted = [...records].sort((a,b) => (b.year * 12 + b.month) - (a.year * 12 + a.month));
       
       let nextState = {
         year: currentYear,
@@ -161,15 +146,24 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
               details: mergedDetails
           };
       }
+      return nextState;
+  };
 
+  // Init on mount
+  useState(() => {
+      const initial = getInitialFormState(data);
+      setForm(initial);
+  });
+
+  // Re-init on data change
+  useEffect(() => {
+      const next = getInitialFormState(data);
       setForm(prev => ({
-          ...nextState,
-          // Keep manually changed date if user is editing
-          year: prev.year !== currentYear ? prev.year : nextState.year,
-          month: prev.month !== currentMonth ? prev.month : nextState.month,
+          ...next,
+          year: prev.year !== currentYear ? prev.year : next.year,
+          month: prev.month !== currentMonth ? prev.month : next.month,
       }));
-
-  }, [data, categories]); // Simple dependency array
+  }, [data, categories]);
 
 
   // Auto-calculate totals based on dynamic details
