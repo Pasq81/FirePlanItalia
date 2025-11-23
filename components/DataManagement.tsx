@@ -25,6 +25,10 @@ const DataManagement: React.FC<DataManagementProps> = ({ onExport, onImport }) =
   };
 
   const handleUploadClick = () => {
+    // Reset the value to ensure onChange fires even if the same file is selected again
+    if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
     fileInputRef.current?.click();
   };
 
@@ -53,8 +57,6 @@ const DataManagement: React.FC<DataManagementProps> = ({ onExport, onImport }) =
       }
     };
     reader.readAsText(file);
-    // Reset value to allow uploading same file again if needed
-    e.target.value = '';
   };
 
   return (
