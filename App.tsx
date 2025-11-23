@@ -6,10 +6,11 @@ import CollapsiblePanel from './components/CollapsiblePanel';
 import { WealthEvolutionChart, IncomeStackChart, ComparisonChart } from './components/Charts';
 import SimulationTable from './components/SimulationTable';
 import { WalletIcon, PiggyBankIcon, ChartBarIcon, ExclamationTriangleIcon, ArrowUpIcon, ChevronDownIcon, ArrowDownIcon, FlagIcon } from './components/Icons';
-import type { UserProfile, Financials, AssetAllocation, Returns, ItalianTools, ActualRecord, OneTimeEvent, MonthlyRecord, BackupData } from './types';
+import type { UserProfile, Financials, AssetAllocation, Returns, ItalianTools, ActualRecord, OneTimeEvent, MonthlyRecord, BackupData, Category } from './types';
 import { runSimulation } from './simulation';
 import MonthlyTrackingView from './components/MonthlyTrackingView';
 import DataManagement from './components/DataManagement';
+import MilestoneTimeline from './components/MilestoneTimeline';
 
 const InputField: React.FC<{
   label: string;
@@ -51,6 +52,22 @@ const Checkbox: React.FC<{
     </div>
   </div>
 );
+
+// --- DEFAULT CATEGORIES ---
+const DEFAULT_CATEGORIES: Category[] = [
+    { id: 'salary', label: 'Stipendio', type: 'income', color: '#4CAF50' },
+    { id: 'bonus', label: 'Bonus/Extra', type: 'income', color: '#8BC34A' },
+    { id: 'rents', label: 'Rendite', type: 'income', color: '#CDDC39' },
+    { id: 'other_inc', label: 'Altro Entrate', type: 'income', color: '#FFEB3B' },
+    
+    { id: 'home', label: 'Casa/Affitto', type: 'expense', color: '#FF8A65' },
+    { id: 'groceries', label: 'Spesa', type: 'expense', color: '#FFC107' },
+    { id: 'transport', label: 'Trasporti', type: 'expense', color: '#415A77' },
+    { id: 'leisure', label: 'Svago', type: 'expense', color: '#BA68C8' },
+    { id: 'utilities', label: 'Bollette', type: 'expense', color: '#26A69A' },
+    { id: 'health', label: 'Salute', type: 'expense', color: '#EF5350' },
+    { id: 'other_exp', label: 'Altro Uscite', type: 'expense', color: '#BDBDBD' },
+];
 
 // --- TRACKING COMPONENT ---
 const TrackingView: React.FC<{
@@ -164,6 +181,13 @@ const TrackingView: React.FC<{
                     variant={latestActual && simDataForYear ? (latestActual.annualExpenses > simDataForYear.totalExpenses ? 'danger' : 'success') : 'default'}
                 />
              </div>
+             
+             {/* Milestone Timeline Moved Here */}
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-3">
+                    <MilestoneTimeline data={actualData} fireNumber={fireTarget} />
+                </div>
+             </div>
 
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Input Form */}
@@ -258,11 +282,35 @@ const TrackingView: React.FC<{
     );
 }
 
+// Helper for migration
+const migrateMonthlyData = (data: any[]): MonthlyRecord[] => {
+    return data.map(d => {
+        // @ts-ignore checks if old field exists
+        if (d.portfolioValue !== undefined && d.stocksValue === undefined) {
+            return {
+                ...d,
+                // @ts-ignore
+                stocksValue: d.portfolioValue, // Dump everything into stocks by default to avoid data loss
+                bondsValue: 0,
+                investedStocks: 0,
+                investedEtf: 0,
+                investedBonds: 0,
+                investedCrypto: 0,
+                investedDerivatives: 0,
+                investedCommodities: 0,
+                investedPension1: 0,
+                investedPension2: 0,
+                portfolioValue: undefined // remove old field logic
+            } as MonthlyRecord;
+        }
+        return d as MonthlyRecord;
+    });
+};
 
 const App: React.FC = () => {
   // --- STATE ---
   const [view, setView] = useState<'simulation' | 'tracking' | 'monthly'>('monthly');
-
+  
   // Profilo
   const [profile, setProfile] = useState<UserProfile>({
     currentAge: 35,
@@ -310,6 +358,12 @@ const App: React.FC = () => {
     pensionIndexationPercent: 75 // Default 75% rivalutazione
   });
 
+  // CATEGORIE DINAMICHE
+  const [categories, setCategories] = useState<Category[]>(() => {
+      const saved = localStorage.getItem('fire_categories');
+      return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+  });
+
   // Tracking Data (Annual)
   const [actualData, setActualData] = useState<ActualRecord[]>(() => {
       const saved = localStorage.getItem('fire_actual_data');
@@ -319,34 +373,9 @@ const App: React.FC = () => {
   // Tracking Data (Monthly)
   const [monthlyData, setMonthlyData] = useState<MonthlyRecord[]>(() => {
     const saved = localStorage.getItem('fire_monthly_data');
-    return saved ? JSON.parse(saved) : [];
+    const parsed = saved ? JSON.parse(saved) : [];
+    return migrateMonthlyData(parsed);
   });
-
-  // Migration Logic for Monthly Data (Old structure with portfolioValue -> New with stocks/bonds)
-  useEffect(() => {
-    const migrated = monthlyData.map(d => {
-        // @ts-ignore checks if old field exists
-        if (d.portfolioValue !== undefined && d.stocksValue === undefined) {
-            return {
-                ...d,
-                // @ts-ignore
-                stocksValue: d.portfolioValue, // Dump everything into stocks by default to avoid data loss
-                bondsValue: 0,
-                investedStocks: 0,
-                investedBonds: 0,
-                investedPension1: 0,
-                investedPension2: 0,
-                portfolioValue: undefined // remove old field logic
-            } as MonthlyRecord;
-        }
-        return d;
-    });
-    // Only set if there was a change to avoid loop, simplistic check
-    if (JSON.stringify(migrated) !== JSON.stringify(monthlyData)) {
-        setMonthlyData(migrated);
-    }
-  }, []);
-
 
   // New OneTimeEvent State for Input
   const [newEvent, setNewEvent] = useState<{name: string, year: number, amount: number, type: 'expense' | 'income'}>({
@@ -388,6 +417,10 @@ const App: React.FC = () => {
     localStorage.setItem('fire_monthly_data', JSON.stringify(monthlyData));
   }, [monthlyData]);
 
+  useEffect(() => {
+    localStorage.setItem('fire_categories', JSON.stringify(categories));
+  }, [categories]);
+
   const handleAddActual = (rec: ActualRecord) => {
       // Replace if exists for same year, else add
       setActualData(prev => {
@@ -411,6 +444,10 @@ const App: React.FC = () => {
     setMonthlyData(prev => prev.filter(p => p.id !== id));
   };
 
+  const handleUpdateCategories = (newCats: Category[]) => {
+      setCategories(newCats);
+  };
+
   // --- DATA IMPORT/EXPORT HANDLERS ---
   const handleExportData = (): BackupData => {
       return {
@@ -421,6 +458,7 @@ const App: React.FC = () => {
           tools,
           actualData,
           monthlyData,
+          categories,
           date: new Date().toISOString()
       };
   };
@@ -432,7 +470,13 @@ const App: React.FC = () => {
       if(data.returns) setRet(data.returns);
       if(data.tools) setTools(data.tools);
       if(data.actualData) setActualData(data.actualData);
-      if(data.monthlyData) setMonthlyData(data.monthlyData);
+      if(data.categories) setCategories(data.categories);
+      
+      if(data.monthlyData) {
+          // Perform migration on import
+          const migrated = migrateMonthlyData(data.monthlyData);
+          setMonthlyData(migrated);
+      }
   };
 
   // --- SIMULATION ---
@@ -765,8 +809,10 @@ const App: React.FC = () => {
             /* MONTHLY VIEW */
             <MonthlyTrackingView 
                 data={monthlyData}
+                categories={categories}
                 onAddRecord={handleAddMonthly}
                 onDeleteRecord={handleDeleteMonthly}
+                onUpdateCategories={handleUpdateCategories}
             />
         )}
 

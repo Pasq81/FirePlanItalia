@@ -118,14 +118,31 @@ export interface ActualRecord {
   notes?: string;
 }
 
+// Dynamic Categories
+export interface Category {
+    id: string;
+    label: string;
+    type: 'income' | 'expense';
+    color: string;
+    isDefault?: boolean;
+}
+
+export type ExpenseDetails = Record<string, number>;
+export type IncomeDetails = Record<string, number>;
+
 export interface MonthlyRecord {
   id: string;
   year: number;
   month: number; // 1-12
   
   // Snapshot Assets Values (Mark to Market)
-  stocksValue: number; // Azionario (Tax 26%)
-  bondsValue: number;  // Obbligazionario (Tax 12.5%)
+  stocksValue: number;     // Azioni Singole (Tax 26%)
+  etfValue: number;        // ETF (Tax 26%)
+  bondsValue: number;      // Obbligazioni White List (Tax 12.5%)
+  cryptoValue: number;     // Criptovalute (Tax 26%)
+  derivativesValue: number;// Derivati (Tax 26%)
+  commoditiesValue: number;// Materie Prime (Tax 26%)
+  
   pensionFund1Value: number;
   pensionFund2Value: number;
   
@@ -133,10 +150,19 @@ export interface MonthlyRecord {
   income: number;   // Entrate nette totali
   expenses: number; // Uscite totali
   savings: number;  // Risparmio effettivo (Income - Expenses)
+  
+  // Details (Keys match Category IDs)
+  incomeDetails?: IncomeDetails;
+  expenseDetails?: ExpenseDetails;
 
   // Monthly Investments (Cash Injected into Assets)
   investedStocks: number;
+  investedEtf: number;
   investedBonds: number;
+  investedCrypto: number;
+  investedDerivatives: number;
+  investedCommodities: number;
+  
   investedPension1: number;
   investedPension2: number;
   
@@ -156,5 +182,6 @@ export interface BackupData {
   tools: ItalianTools;
   actualData: ActualRecord[];
   monthlyData: MonthlyRecord[];
+  categories: Category[];
   date: string;
 }
