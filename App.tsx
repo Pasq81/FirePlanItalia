@@ -285,25 +285,25 @@ const TrackingView: React.FC<{
 // Helper for migration
 const migrateMonthlyData = (data: any[]): MonthlyRecord[] => {
     return data.map(d => {
-        // @ts-ignore checks if old field exists
+        let rec = { ...d } as MonthlyRecord;
+        
+        // Migration 1: portfolioValue -> stocksValue
+        // @ts-ignore
         if (d.portfolioValue !== undefined && d.stocksValue === undefined) {
-            return {
-                ...d,
-                // @ts-ignore
-                stocksValue: d.portfolioValue, // Dump everything into stocks by default to avoid data loss
+             rec = {
+                ...rec,
+                stocksValue: d.portfolioValue, // Dump everything into stocks by default
                 bondsValue: 0,
-                investedStocks: 0,
-                investedEtf: 0,
-                investedBonds: 0,
-                investedCrypto: 0,
-                investedDerivatives: 0,
-                investedCommodities: 0,
-                investedPension1: 0,
-                investedPension2: 0,
-                portfolioValue: undefined // remove old field logic
-            } as MonthlyRecord;
+                // @ts-ignore
+                portfolioValue: undefined 
+            };
         }
-        return d as MonthlyRecord;
+
+        // Migration 2: Add Liquidity fields
+        if (rec.liquidityValue === undefined) rec.liquidityValue = 0;
+        if (rec.investedLiquidity === undefined) rec.investedLiquidity = 0;
+
+        return rec;
     });
 };
 
@@ -505,10 +505,10 @@ const App: React.FC = () => {
   const currentTotalExpenses = fin.annualExpenses + (hasActiveMortgage ? fin.annualMortgage : 0);
 
   return (
-    <div className="min-h-screen bg-brand-primary font-sans text-brand-text pb-20">
+    <div className="min-h-screen bg-brand-primary font-sans text-brand-text flex flex-col">
       <Header /> 
       
-      <main className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+      <main className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl flex-grow">
         
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
             <div>
@@ -823,6 +823,19 @@ const App: React.FC = () => {
         />
 
       </main>
+
+      <footer className="py-6 mt-8 border-t border-brand-accent/20 bg-brand-primary/80">
+          <div className="container mx-auto px-4 text-center text-xs text-brand-light opacity-60">
+              <p>
+                  DISCLAIMER: Questa applicazione è uno strumento di simulazione a scopo puramente educativo e informativo. 
+                  L'autore non si assume alcuna responsabilità per l'accuratezza dei calcoli, delle proiezioni o per eventuali decisioni finanziarie prese sulla base di questi dati.
+                  Le performance passate non sono garanzia di rendimenti futuri. Si consiglia di consultare un consulente finanziario professionista.
+              </p>
+              <p className="mt-2">
+                  FinJourney &copy; {new Date().getFullYear()} - Dati salvati localmente nel browser.
+              </p>
+          </div>
+      </footer>
     </div>
   );
 };

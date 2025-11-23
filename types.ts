@@ -139,6 +139,7 @@ export interface MonthlyRecord {
   stocksValue: number;     // Azioni Singole (Tax 26%)
   etfValue: number;        // ETF (Tax 26%)
   bondsValue: number;      // Obbligazioni White List (Tax 12.5%)
+  liquidityValue: number;  // Conto Corrente / Contanti (No Tax / Tax su giacenza)
   cryptoValue: number;     // Criptovalute (Tax 26%)
   derivativesValue: number;// Derivati (Tax 26%)
   commoditiesValue: number;// Materie Prime (Tax 26%)
@@ -159,6 +160,7 @@ export interface MonthlyRecord {
   investedStocks: number;
   investedEtf: number;
   investedBonds: number;
+  investedLiquidity: number; // Nuova liquidità accantonata
   investedCrypto: number;
   investedDerivatives: number;
   investedCommodities: number;
