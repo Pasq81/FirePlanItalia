@@ -168,6 +168,15 @@ export interface MonthlyRecord {
   investedPension1: number;
   investedPension2: number;
   
+  // Detailed Pension Breakdown (Optional for backward compatibility)
+  investedPension1Voluntary?: number;
+  investedPension1Employer?: number;
+  investedPension1Tfr?: number;
+  
+  investedPension2Voluntary?: number;
+  investedPension2Employer?: number;
+  investedPension2Tfr?: number;
+
   notes?: string;
 }
 
