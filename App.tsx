@@ -280,6 +280,10 @@ const migrateMonthlyData = (data: any[]): MonthlyRecord[] => {
         if (rec.liquidityValue === undefined) rec.liquidityValue = 0;
         if (rec.investedLiquidity === undefined) rec.investedLiquidity = 0;
 
+        // Migration 3: Add Deposit Account fields
+        if (rec.depositAccountValue === undefined) rec.depositAccountValue = 0;
+        if (rec.investedDepositAccount === undefined) rec.investedDepositAccount = 0;
+
         return rec;
     });
 };

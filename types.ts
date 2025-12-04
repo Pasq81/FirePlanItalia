@@ -138,6 +138,7 @@ export interface MonthlyRecord {
   // Snapshot Assets Values (Mark to Market)
   stocksValue: number;     // Azioni Singole (Tax 26%)
   etfValue: number;        // ETF (Tax 26%)
+  depositAccountValue: number; // Conto Deposito (Tax 26%)
   bondsValue: number;      // Obbligazioni White List (Tax 12.5%)
   liquidityValue: number;  // Conto Corrente / Contanti (No Tax / Tax su giacenza)
   cryptoValue: number;     // Criptovalute (Tax 26%)
@@ -159,6 +160,7 @@ export interface MonthlyRecord {
   // Monthly Investments (Cash Injected into Assets)
   investedStocks: number;
   investedEtf: number;
+  investedDepositAccount: number;
   investedBonds: number;
   investedLiquidity: number; // Nuova liquidità accantonata
   investedCrypto: number;
