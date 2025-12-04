@@ -5,7 +5,7 @@ import {
 import type { MonthlyRecord, Category } from '../types';
 import { ArrowUpIcon, ArrowDownIcon, PiggyBankIcon, ChartBarIcon, RefreshIcon } from './Icons';
 import DashboardCard from './DashboardCard';
-import CollapsiblePanel from './CollapsiblePanel';
+import CollapsiblePanel from './components/CollapsiblePanel';
 import InputField from './InputField';
 
 interface MonthlyTrackingViewProps {
@@ -120,19 +120,8 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
       if (existing) {
           // MODALITA' MODIFICA
           const mergedDetails = { ...baseDetails };
-          
-          if (existing.incomeDetails) {
-            const d = existing.incomeDetails;
-            Object.keys(d).forEach(k => { 
-                if (categories.some(c => c.id === k)) mergedDetails[k] = Number(d[k]); 
-            });
-          }
-          if (existing.expenseDetails) {
-            const d = existing.expenseDetails;
-            Object.keys(d).forEach(k => { 
-                if (categories.some(c => c.id === k)) mergedDetails[k] = Number(d[k]); 
-            });
-          }
+          if (existing.incomeDetails) Object.entries(existing.incomeDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
+          if (existing.expenseDetails) Object.entries(existing.expenseDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
 
           setForm({
               year: newYear,
@@ -232,19 +221,8 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
       if (sorted.length > 0) {
           const last = sorted[0];
           const mergedDetails: Record<string, number> = { ...initialDetails };
-          
-          if (last.incomeDetails) {
-            const d = last.incomeDetails;
-            Object.keys(d).forEach(k => { 
-                if (categories.some(c => c.id === k)) mergedDetails[k] = Number(d[k]); 
-            });
-          }
-          if (last.expenseDetails) {
-            const d = last.expenseDetails;
-            Object.keys(d).forEach(k => { 
-                if (categories.some(c => c.id === k)) mergedDetails[k] = Number(d[k]); 
-            });
-          }
+          if (last.incomeDetails) Object.entries(last.incomeDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
+          if (last.expenseDetails) Object.entries(last.expenseDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
 
           nextState = {
               ...nextState,
