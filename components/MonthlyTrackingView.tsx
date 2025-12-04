@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ComposedChart, Line, Bar, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell 
@@ -78,6 +77,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
     
     stocksValue: 0,
     etfValue: 0,
+    depositAccountValue: 0,
     bondsValue: 0,
     liquidityValue: 0,
     cryptoValue: 0,
@@ -89,6 +89,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
     
     investedStocks: 0,
     investedEtf: 0,
+    investedDepositAccount: 0,
     investedBonds: 0,
     investedLiquidity: 0,
     investedCrypto: 0,
@@ -119,8 +120,8 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
       if (existing) {
           // MODALITA' MODIFICA
           const mergedDetails = { ...baseDetails };
-          if (existing.incomeDetails) Object.entries(existing.incomeDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = v; });
-          if (existing.expenseDetails) Object.entries(existing.expenseDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = v; });
+          if (existing.incomeDetails) Object.entries(existing.incomeDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
+          if (existing.expenseDetails) Object.entries(existing.expenseDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
 
           setForm({
               year: newYear,
@@ -128,6 +129,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
               // Snapshot
               stocksValue: existing.stocksValue || 0,
               etfValue: existing.etfValue || 0,
+              depositAccountValue: existing.depositAccountValue || 0,
               bondsValue: existing.bondsValue || 0,
               liquidityValue: existing.liquidityValue || 0,
               cryptoValue: existing.cryptoValue || 0,
@@ -138,6 +140,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
               // Flows
               investedStocks: existing.investedStocks || 0,
               investedEtf: existing.investedEtf || 0,
+              investedDepositAccount: existing.investedDepositAccount || 0,
               investedBonds: existing.investedBonds || 0,
               investedLiquidity: existing.investedLiquidity || 0,
               investedCrypto: existing.investedCrypto || 0,
@@ -167,6 +170,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
               // Copy Snapshot
               stocksValue: previous?.stocksValue || 0,
               etfValue: previous?.etfValue || 0,
+              depositAccountValue: previous?.depositAccountValue || 0,
               bondsValue: previous?.bondsValue || 0,
               liquidityValue: previous?.liquidityValue || 0,
               cryptoValue: previous?.cryptoValue || 0,
@@ -178,6 +182,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
               // Reset Flows
               investedStocks: 0,
               investedEtf: 0,
+              investedDepositAccount: 0,
               investedBonds: 0,
               investedLiquidity: 0,
               investedCrypto: 0,
@@ -204,9 +209,9 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
       let nextState = {
         year: currentYear,
         month: currentMonth,
-        stocksValue: 0, etfValue: 0, bondsValue: 0, liquidityValue: 0, cryptoValue: 0, derivativesValue: 0, commoditiesValue: 0,
+        stocksValue: 0, etfValue: 0, depositAccountValue: 0, bondsValue: 0, liquidityValue: 0, cryptoValue: 0, derivativesValue: 0, commoditiesValue: 0,
         pension1Value: 0, pension2Value: 0,
-        investedStocks: 0, investedEtf: 0, investedBonds: 0, investedLiquidity: 0, investedCrypto: 0, investedDerivatives: 0, investedCommodities: 0, 
+        investedStocks: 0, investedEtf: 0, investedDepositAccount: 0, investedBonds: 0, investedLiquidity: 0, investedCrypto: 0, investedDerivatives: 0, investedCommodities: 0, 
         investedPension1Voluntary: 0, investedPension1Employer: 0, investedPension1Tfr: 0,
         investedPension2Voluntary: 0,
         details: initialDetails,
@@ -216,8 +221,8 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
       if (sorted.length > 0) {
           const last = sorted[0];
           const mergedDetails: Record<string, number> = { ...initialDetails };
-          if (last.incomeDetails) Object.entries(last.incomeDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = v; });
-          if (last.expenseDetails) Object.entries(last.expenseDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = v; });
+          if (last.incomeDetails) Object.entries(last.incomeDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
+          if (last.expenseDetails) Object.entries(last.expenseDetails).forEach(([k, v]) => { if (categories.some(c => c.id === k)) mergedDetails[k] = Number(v as any); });
 
           nextState = {
               ...nextState,
@@ -225,6 +230,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
               month: last.month === 12 ? 1 : last.month + 1,
               stocksValue: last.stocksValue || 0,
               etfValue: last.etfValue || 0,
+              depositAccountValue: last.depositAccountValue || 0,
               bondsValue: last.bondsValue || 0,
               liquidityValue: last.liquidityValue || 0,
               cryptoValue: last.cryptoValue || 0,
@@ -257,16 +263,10 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
   const totalExpenses = expenseCats.reduce((acc, c) => acc + (form.details[c.id] || 0), 0);
   
   // Total Invested = All outflows towards assets (Only Voluntary parts count as "Spending" from Net Income)
-  const totalInvestedFlow = form.investedStocks + form.investedEtf + form.investedBonds + form.investedLiquidity + form.investedCrypto + form.investedDerivatives + form.investedCommodities + 
+  const totalInvestedFlow = form.investedStocks + form.investedEtf + form.investedDepositAccount + form.investedBonds + form.investedLiquidity + form.investedCrypto + form.investedDerivatives + form.investedCommodities + 
                             form.investedPension1Voluntary + form.investedPension1Employer + form.investedPension1Tfr + form.investedPension2Voluntary;
 
-  // Savings = Income - Expenses - Voluntary Pension Contribs
-  // We assume other investments come from savings. 
-  // Wait, usually "Savings" = Income - Expenses. 
-  // Then "Invested" is part of savings.
-  // But Pension Voluntary is deducted from paycheck (usually) or paid from net. 
-  // Let's stick to: Savings = Income - Expenses. 
-  // Pension Voluntary is an investment flow FROM savings.
+  // Savings = Income - Expenses
   const savings = totalIncome - totalExpenses;
 
   const handleDetailChange = (id: string, val: number) => {
@@ -283,10 +283,10 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
 
         setForm(prev => ({
             ...prev,
-            stocksValue: 0, etfValue: 0, bondsValue: 0, liquidityValue: 0,
+            stocksValue: 0, etfValue: 0, depositAccountValue: 0, bondsValue: 0, liquidityValue: 0,
             cryptoValue: 0, derivativesValue: 0, commoditiesValue: 0,
             pension1Value: 0, pension2Value: 0,
-            investedStocks: 0, investedEtf: 0, investedBonds: 0, investedLiquidity: 0,
+            investedStocks: 0, investedEtf: 0, investedDepositAccount: 0, investedBonds: 0, investedLiquidity: 0,
             investedCrypto: 0, investedDerivatives: 0, investedCommodities: 0,
             investedPension1Voluntary: 0, investedPension1Employer: 0, investedPension1Tfr: 0,
             investedPension2Voluntary: 0,
@@ -315,6 +315,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
           
           stocksValue: form.stocksValue,
           etfValue: form.etfValue,
+          depositAccountValue: form.depositAccountValue,
           bondsValue: form.bondsValue,
           liquidityValue: form.liquidityValue,
           cryptoValue: form.cryptoValue,
@@ -326,6 +327,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
           
           investedStocks: form.investedStocks,
           investedEtf: form.investedEtf,
+          investedDepositAccount: form.investedDepositAccount,
           investedBonds: form.investedBonds,
           investedLiquidity: form.investedLiquidity,
           investedCrypto: form.investedCrypto,
@@ -367,23 +369,28 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
   // --- LOGICA MEDIE ---
   const calculateAverage = (records: MonthlyRecord[]) => {
       if (records.length === 0) return null;
+      // Force strict number conversion to avoid string concatenation issues
       const sum = records.reduce((acc, r) => ({
-          income: acc.income + r.income,
-          expenses: acc.expenses + r.expenses,
-          savings: acc.savings + r.savings,
+          income: acc.income + Number(r.income),
+          expenses: acc.expenses + Number(r.expenses),
+          savings: acc.savings + Number(r.savings),
           invested: acc.invested + (
-              r.investedStocks + (r.investedEtf||0) + r.investedBonds + (r.investedLiquidity||0) +
-              (r.investedCrypto||0) + (r.investedDerivatives||0) + (r.investedCommodities||0) + 
-              (r.investedPension1Voluntary || 0) + (r.investedPension2Voluntary || 0) 
+              Number(r.investedStocks) + Number(r.investedEtf||0) + Number(r.investedDepositAccount||0) + Number(r.investedBonds) + Number(r.investedLiquidity||0) +
+              Number(r.investedCrypto||0) + Number(r.investedDerivatives||0) + Number(r.investedCommodities||0) + 
+              Number(r.investedPension1Voluntary || 0) + Number(r.investedPension2Voluntary || 0) 
               // Note: Only counting Voluntary contributions as "Invested from Income" for averages
           )
       }), { income: 0, expenses: 0, savings: 0, invested: 0 });
       
       return {
-          income: sum.income / records.length,
-          expenses: sum.expenses / records.length,
-          savings: sum.savings / records.length,
-          invested: sum.invested / records.length
+          values: {
+            income: sum.income / records.length,
+            expenses: sum.expenses / records.length,
+            savings: sum.savings / records.length,
+            invested: sum.invested / records.length
+          },
+          total: sum,
+          count: records.length
       };
   };
 
@@ -399,6 +406,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
   const allAssets = [
       { id: 'stocks', name: 'Azioni', value: form.stocksValue, color: '#60A5FA' },
       { id: 'etf', name: 'ETF', value: form.etfValue, color: '#93C5FD' },
+      { id: 'deposit', name: 'Conto Dep.', value: form.depositAccountValue, color: '#6366F1' },
       { id: 'crypto', name: 'Crypto', value: form.cryptoValue, color: '#C084FC' },
       { id: 'commodities', name: 'Mat. Prime', value: form.commoditiesValue, color: '#FCD34D' },
       { id: 'derivatives', name: 'Derivati', value: form.derivativesValue, color: '#F87171' },
@@ -424,18 +432,18 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
       if (!prev) return { abs: 0, pct: 0 };
       
       const assetsCurr = 
-        current.stocksValue + (current.etfValue||0) + current.bondsValue + (current.liquidityValue||0) +
+        current.stocksValue + (current.etfValue||0) + (current.depositAccountValue||0) + current.bondsValue + (current.liquidityValue||0) +
         (current.cryptoValue||0) + (current.derivativesValue||0) + (current.commoditiesValue||0) +
         current.pensionFund1Value + current.pensionFund2Value;
         
       const assetsPrev = 
-        prev.stocksValue + (prev.etfValue||0) + prev.bondsValue + (prev.liquidityValue||0) +
+        prev.stocksValue + (prev.etfValue||0) + (prev.depositAccountValue||0) + prev.bondsValue + (prev.liquidityValue||0) +
         (prev.cryptoValue||0) + (prev.derivativesValue||0) + (prev.commoditiesValue||0) +
         prev.pensionFund1Value + prev.pensionFund2Value;
       
       // For performance, we count ALL inflows to pension (Vol+Emp+TFR) as "New Invested Capital"
       const investedCurr = 
-        current.investedStocks + (current.investedEtf||0) + current.investedBonds + (current.investedLiquidity||0) +
+        current.investedStocks + (current.investedEtf||0) + (current.investedDepositAccount||0) + current.investedBonds + (current.investedLiquidity||0) +
         (current.investedCrypto||0) + (current.investedDerivatives||0) + (current.investedCommodities||0) +
         (current.investedPension1Voluntary || 0) + (current.investedPension1Employer || 0) + (current.investedPension1Tfr || 0) +
         (current.investedPension2Voluntary || 0) + (current.investedPension2Employer || 0) + (current.investedPension2Tfr || 0);
@@ -446,7 +454,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
   };
   
   const getTotalWealth = (r: MonthlyRecord) => 
-    r.stocksValue + (r.etfValue||0) + r.bondsValue + (r.liquidityValue||0) +
+    r.stocksValue + (r.etfValue||0) + (r.depositAccountValue||0) + r.bondsValue + (r.liquidityValue||0) +
     (r.cryptoValue||0) + (r.derivativesValue||0) + (r.commoditiesValue||0) +
     r.pensionFund1Value + r.pensionFund2Value;
 
@@ -475,31 +483,46 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
                     <tbody className="font-mono">
                         <tr className="border-b border-brand-accent/10">
                             <td className="py-3 text-left font-medium text-brand-light">Entrate Nette</td>
-                            <td className="py-3 px-4">{averages.last3 ? formatCurrency(averages.last3.income) : '-'}</td>
-                            <td className="py-3 px-4">{averages.last6 ? formatCurrency(averages.last6.income) : '-'}</td>
-                            <td className="py-3 px-4">{averages.last12 ? formatCurrency(averages.last12.income) : '-'}</td>
-                            <td className="py-3 px-4 text-brand-teal font-bold">{averages.ytd ? formatCurrency(averages.ytd.income) : '-'}</td>
+                            <td className="py-3 px-4">{averages.last3 ? formatCurrency(averages.last3.values.income) : '-'}</td>
+                            <td className="py-3 px-4">{averages.last6 ? formatCurrency(averages.last6.values.income) : '-'}</td>
+                            <td className="py-3 px-4">{averages.last12 ? formatCurrency(averages.last12.values.income) : '-'}</td>
+                            <td className="py-3 px-4 text-brand-teal font-bold">{averages.ytd ? formatCurrency(averages.ytd.values.income) : '-'}</td>
                         </tr>
                         <tr className="border-b border-brand-accent/10">
                             <td className="py-3 text-left font-medium text-brand-light">Spese Totali</td>
-                            <td className="py-3 px-4 text-red-300">{averages.last3 ? formatCurrency(averages.last3.expenses) : '-'}</td>
-                            <td className="py-3 px-4 text-red-300">{averages.last6 ? formatCurrency(averages.last6.expenses) : '-'}</td>
-                            <td className="py-3 px-4 text-red-300">{averages.last12 ? formatCurrency(averages.last12.expenses) : '-'}</td>
-                            <td className="py-3 px-4 text-red-300 font-bold">{averages.ytd ? formatCurrency(averages.ytd.expenses) : '-'}</td>
+                            <td className="py-3 px-4 text-red-300">{averages.last3 ? formatCurrency(averages.last3.values.expenses) : '-'}</td>
+                            <td className="py-3 px-4 text-red-300">{averages.last6 ? formatCurrency(averages.last6.values.expenses) : '-'}</td>
+                            <td className="py-3 px-4 text-red-300">{averages.last12 ? formatCurrency(averages.last12.values.expenses) : '-'}</td>
+                            <td className="py-3 px-4 text-red-300 font-bold">{averages.ytd ? formatCurrency(averages.ytd.values.expenses) : '-'}</td>
                         </tr>
                         <tr className="border-b border-brand-accent/10 bg-brand-primary/10">
                             <td className="py-3 text-left font-medium text-brand-light">Risparmio Effettivo</td>
-                            <td className="py-3 px-4 text-green-400">{averages.last3 ? formatCurrency(averages.last3.savings) : '-'}</td>
-                            <td className="py-3 px-4 text-green-400">{averages.last6 ? formatCurrency(averages.last6.savings) : '-'}</td>
-                            <td className="py-3 px-4 text-green-400">{averages.last12 ? formatCurrency(averages.last12.savings) : '-'}</td>
-                            <td className="py-3 px-4 text-green-400 font-bold">{averages.ytd ? formatCurrency(averages.ytd.savings) : '-'}</td>
+                            <td 
+                                className="py-3 px-4 text-green-400 cursor-help" 
+                                title={averages.last3 ? `Formula: Totale €${formatCurrency(averages.last3.total.savings)} / ${averages.last3.count} mesi` : ''}
+                            >
+                                {averages.last3 ? formatCurrency(averages.last3.values.savings) : '-'}
+                            </td>
+                            <td 
+                                className="py-3 px-4 text-green-400 cursor-help"
+                                title={averages.last6 ? `Formula: Totale €${formatCurrency(averages.last6.total.savings)} / ${averages.last6.count} mesi` : ''}
+                            >
+                                {averages.last6 ? formatCurrency(averages.last6.values.savings) : '-'}
+                            </td>
+                            <td 
+                                className="py-3 px-4 text-green-400 cursor-help border-b-2 border-dotted border-green-500/30"
+                                title={averages.last12 ? `Formula: Totale €${formatCurrency(averages.last12.total.savings)} / ${averages.last12.count} mesi` : ''}
+                            >
+                                {averages.last12 ? formatCurrency(averages.last12.values.savings) : '-'}
+                            </td>
+                            <td className="py-3 px-4 text-green-400 font-bold">{averages.ytd ? formatCurrency(averages.ytd.values.savings) : '-'}</td>
                         </tr>
                         <tr>
                             <td className="py-3 text-left font-medium text-brand-light">Nuovi Investimenti (Miei)</td>
-                            <td className="py-3 px-4 text-blue-300">{averages.last3 ? formatCurrency(averages.last3.invested) : '-'}</td>
-                            <td className="py-3 px-4 text-blue-300">{averages.last6 ? formatCurrency(averages.last6.invested) : '-'}</td>
-                            <td className="py-3 px-4 text-blue-300">{averages.last12 ? formatCurrency(averages.last12.invested) : '-'}</td>
-                            <td className="py-3 px-4 text-blue-300 font-bold">{averages.ytd ? formatCurrency(averages.ytd.invested) : '-'}</td>
+                            <td className="py-3 px-4 text-blue-300">{averages.last3 ? formatCurrency(averages.last3.values.invested) : '-'}</td>
+                            <td className="py-3 px-4 text-blue-300">{averages.last6 ? formatCurrency(averages.last6.values.invested) : '-'}</td>
+                            <td className="py-3 px-4 text-blue-300">{averages.last12 ? formatCurrency(averages.last12.values.invested) : '-'}</td>
+                            <td className="py-3 px-4 text-blue-300 font-bold">{averages.ytd ? formatCurrency(averages.ytd.values.invested) : '-'}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -558,6 +581,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 <InputField label="Azioni Singole" value={form.stocksValue} onChange={v => setForm(p => ({...p, stocksValue: v}))} suffix="€" color="#60A5FA" />
                                 <InputField label="ETF" value={form.etfValue} onChange={v => setForm(p => ({...p, etfValue: v}))} suffix="€" color="#93C5FD" />
+                                <InputField label="Conto Deposito" value={form.depositAccountValue} onChange={v => setForm(p => ({...p, depositAccountValue: v}))} suffix="€" color="#6366F1" />
                                 <InputField label="Criptovalute" value={form.cryptoValue} onChange={v => setForm(p => ({...p, cryptoValue: v}))} suffix="€" color="#C084FC" />
                                 <InputField label="Materie Prime" value={form.commoditiesValue} onChange={v => setForm(p => ({...p, commoditiesValue: v}))} suffix="€" color="#FCD34D" />
                                 <InputField label="Derivati" value={form.derivativesValue} onChange={v => setForm(p => ({...p, derivativesValue: v}))} suffix="€" color="#F87171" />
@@ -587,6 +611,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                                 <InputField label="+ Azioni" value={form.investedStocks} onChange={v => setForm(p => ({...p, investedStocks: v}))} suffix="€" />
                                 <InputField label="+ ETF" value={form.investedEtf} onChange={v => setForm(p => ({...p, investedEtf: v}))} suffix="€" />
+                                <InputField label="+ Conto Dep." value={form.investedDepositAccount} onChange={v => setForm(p => ({...p, investedDepositAccount: v}))} suffix="€" />
                                 <InputField label="+ Cripto" value={form.investedCrypto} onChange={v => setForm(p => ({...p, investedCrypto: v}))} suffix="€" />
                                 <InputField label="+ Mat. Prime" value={form.investedCommodities} onChange={v => setForm(p => ({...p, investedCommodities: v}))} suffix="€" />
                                 <InputField label="+ Derivati" value={form.investedDerivatives} onChange={v => setForm(p => ({...p, investedDerivatives: v}))} suffix="€" />
@@ -702,10 +727,12 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
                         <th className="px-4 py-3">Data</th>
                         <th className="px-4 py-3 text-right">Patrimonio Tot</th>
                         <th className="px-4 py-3 text-right text-blue-300" title="Azioni + ETF">Azioni/ETF</th>
+                        <th className="px-4 py-3 text-right text-indigo-300" title="Conto Deposito">Conto Dep.</th>
                         <th className="px-4 py-3 text-right text-purple-300" title="Cripto + Derivati + Commodities">Alt. Risk</th>
                         <th className="px-4 py-3 text-right text-green-300">Obblig.</th>
                         <th className="px-4 py-3 text-right text-teal-300">Liqu.</th>
-                        <th className="px-4 py-3 text-right text-brand-gold">Fondi P.</th>
+                        <th className="px-4 py-3 text-right text-brand-gold">FP 1</th>
+                        <th className="px-4 py-3 text-right text-orange-300">FP 2</th>
                         <th className="px-4 py-3 text-right border-l border-brand-accent/20">Rend. Mese</th>
                         <th className="px-4 py-3 text-right">% Mese</th>
                         <th className="px-4 py-3 text-right text-green-400">Risp.</th>
@@ -726,10 +753,12 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
                                 <td className="px-4 py-3 font-medium">{MONTHS[rec.month-1].substring(0,3)} {rec.year}</td>
                                 <td className="px-4 py-3 text-right font-bold">{formatCurrency(netWorth)}</td>
                                 <td className="px-4 py-3 text-right font-mono text-blue-300/80">{formatCurrency(totalStocksEtf)}</td>
+                                <td className="px-4 py-3 text-right font-mono text-indigo-300/80">{formatCurrency(rec.depositAccountValue || 0)}</td>
                                 <td className="px-4 py-3 text-right font-mono text-purple-300/80">{formatCurrency(totalAltRisk)}</td>
                                 <td className="px-4 py-3 text-right font-mono text-green-300/80">{formatCurrency(rec.bondsValue)}</td>
                                 <td className="px-4 py-3 text-right font-mono text-teal-300/80">{formatCurrency(rec.liquidityValue || 0)}</td>
-                                <td className="px-4 py-3 text-right font-mono text-brand-gold/80">{formatCurrency(totalPension)}</td>
+                                <td className="px-4 py-3 text-right font-mono text-brand-gold/80">{formatCurrency(rec.pensionFund1Value)}</td>
+                                <td className="px-4 py-3 text-right font-mono text-orange-300/80">{formatCurrency(rec.pensionFund2Value)}</td>
                                 <td className={`px-4 py-3 text-right font-mono border-l border-brand-accent/20 ${performance.abs >= 0 ? 'text-green-400' : 'text-red-400'}`}>{prevRec ? (performance.abs > 0 ? '+' : '') + formatCurrency(performance.abs) : '-'}</td>
                                 <td className={`px-4 py-3 text-right font-mono ${performance.pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>{prevRec ? (performance.pct > 0 ? '+' : '') + performance.pct.toFixed(2) + '%' : '-'}</td>
                                 <td className="px-4 py-3 text-right font-mono font-bold">{formatCurrency(rec.savings)}</td>
@@ -737,7 +766,7 @@ const MonthlyTrackingView: React.FC<MonthlyTrackingViewProps> = ({ data, categor
                             </tr>
                         );
                     })}
-                    {filteredData.length === 0 && (<tr><td colSpan={10} className="text-center py-4 text-brand-light italic">Nessun dato mensile inserito</td></tr>)}
+                    {filteredData.length === 0 && (<tr><td colSpan={11} className="text-center py-4 text-brand-light italic">Nessun dato mensile inserito</td></tr>)}
                 </tbody>
             </table>
         </div>
